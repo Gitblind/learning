@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t rongye/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run rongye/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t rongye/multi-client./cient
+  - docker build -t rongye/multi-nginx ./nginx
+  - docker build -t rongye/multi-server ./server
+  - docker build -t rongye/multi-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push rongye/multi-client
+  - docker push rongye/mulgi-nginx
+  - docker push rongye/multi-server
+  - docker push rongye/multi-worker
